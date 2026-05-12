@@ -37,7 +37,13 @@ class Task(BaseModel):
     @classmethod
     def parse_deadline(cls, v):
         if isinstance(v, str):
-            # Accept both with and without timezone info
+            # Try ISO format first (standard for JS toISOString)
+            try:
+                return datetime.fromisoformat(v.replace("Z", "+00:00"))
+            except ValueError:
+                pass
+            
+            # Fallback to common formats
             for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
                 try:
                     return datetime.strptime(v, fmt)
@@ -72,6 +78,10 @@ class TaskCreate(BaseModel):
     @classmethod
     def parse_deadline(cls, v):
         if isinstance(v, str):
+            try:
+                return datetime.fromisoformat(v.replace("Z", "+00:00"))
+            except ValueError:
+                pass
             for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
                 try:
                     return datetime.strptime(v, fmt)

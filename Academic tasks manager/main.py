@@ -230,13 +230,13 @@ def format_deadline(deadline_str: str, hours: float) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Sidebar — Add / Edit Task form
+# Render Add Assignment Page
 # ---------------------------------------------------------------------------
 
-def sidebar_form():
-    st.sidebar.markdown("## ➕ Add New Task")
-
-    with st.sidebar.form("task_form", clear_on_submit=True):
+def render_add_assignment():
+    st.markdown("## ➕ Add New Assignment")
+    
+    with st.form("add_task_form", clear_on_submit=True):
         title    = st.text_input("Title *", placeholder="e.g. Midterm Assignment")
         subject  = st.text_input("Subject *", placeholder="e.g. Data Structures")
         task_type = st.selectbox("Type", TASK_TYPES)
@@ -252,12 +252,12 @@ def sidebar_form():
                 value=datetime.now().replace(second=0, microsecond=0).time()
             )
         weightage = st.slider("Weightage (%)", 0, 100, 20)
-        notes = st.text_area("Notes (optional)", max_chars=500, height=80)
-        submitted = st.form_submit_button("💾 Save Task", use_container_width=True)
+        notes = st.text_area("Notes (optional)", max_chars=500, height=120)
+        submitted = st.form_submit_button("💾 Save Assignment", use_container_width=True)
 
     if submitted:
         if not title.strip() or not subject.strip():
-            st.sidebar.error("Title and Subject are required.")
+            st.error("Title and Subject are required.")
         else:
             deadline_dt = datetime.combine(deadline_date, deadline_time)
             payload = {
@@ -269,13 +269,13 @@ def sidebar_form():
                 "notes":     notes.strip() or None,
             }
             if api_create(payload):
-                st.sidebar.success("✅ Task saved!")
+                st.success("✅ Assignment saved! Returning to dashboard...")
                 st.cache_data.clear()
-                st.rerun()
-
+                # Simple delay before redirecting conceptually (in Streamlit we just switch state or let user switch)
+                st.info("You can now switch back to the Dashboard.")
 
 # ---------------------------------------------------------------------------
-# Sidebar — Filters
+# Sidebar — Filters (Dashboard only)
 # ---------------------------------------------------------------------------
 
 def sidebar_filters(tasks: list[dict]) -> tuple[list[str], list[str], bool]:
@@ -298,7 +298,7 @@ def sidebar_filters(tasks: list[dict]) -> tuple[list[str], list[str], bool]:
 
 def render_task_table(tasks: list[dict]):
     if not tasks:
-        st.info("🎉 No tasks found. Add one using the sidebar form!")
+        st.info("🎉 No tasks found. Add one using the menu!")
         return
 
     rows_html = ""
@@ -307,7 +307,6 @@ def render_task_table(tasks: list[dict]):
         urg    = urgency_label(h)
         dl_fmt = format_deadline(t.get("deadline", ""), h)
 
-        # build one HTML table row
         rows_html += f"""
         <tr class="row-{urg}">
           <td style="padding:10px 12px;font-weight:600;color:#e2e8f0">{t.get('title','—')}</td>
@@ -339,36 +338,25 @@ def render_task_table(tasks: list[dict]):
     st.markdown(table_html, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------------------------
-# Delete / Edit panel
-# ---------------------------------------------------------------------------
-
 def render_manage_panel(tasks: list[dict]):
     if not tasks:
         return
-
     st.markdown("---")
     st.markdown("### ⚙️ Manage Tasks")
-
     options = {f"[{t['id']}] {t['title']} — {t['subject']}": t for t in tasks}
     choice  = st.selectbox("Select a task to manage", list(options.keys()), key="manage_select")
     selected_task = options[choice]
-
     col_del, col_edit, col_spacer = st.columns([1, 1, 4])
-
     with col_del:
         if st.button("🗑️ Delete", key="btn_delete", use_container_width=True):
             if api_delete(selected_task["id"]):
                 st.success("Task deleted.")
                 st.cache_data.clear()
                 st.rerun()
-
     with col_edit:
         if st.button("✏️ Edit", key="btn_edit_toggle", use_container_width=True):
             st.session_state["editing_id"] = selected_task["id"]
             st.session_state["editing_task"] = selected_task
-
-    # Inline edit form
     if st.session_state.get("editing_id") == selected_task["id"]:
         et = st.session_state["editing_task"]
         with st.form("edit_form"):
@@ -376,181 +364,110 @@ def render_manage_panel(tasks: list[dict]):
             e_title    = st.text_input("Title", value=et.get("title", ""))
             e_subject  = st.text_input("Subject", value=et.get("subject", ""))
             e_type     = st.selectbox("Type", TASK_TYPES, index=TASK_TYPES.index(et.get("task_type", "Assignment")))
-            try:
-                dl = datetime.fromisoformat(et["deadline"]).replace(tzinfo=None)
-            except Exception:
-                dl = datetime.now()
+            try: dl = datetime.fromisoformat(et["deadline"]).replace(tzinfo=None)
+            except: dl = datetime.now()
             e_date     = st.date_input("Deadline date", value=dl.date())
             e_time     = st.time_input("Deadline time", value=dl.time())
             e_weight   = st.slider("Weightage (%)", 0, 100, int(et.get("weightage", 20)))
             e_notes    = st.text_area("Notes", value=et.get("notes") or "", max_chars=500)
             save = st.form_submit_button("💾 Save Changes")
             cancel = st.form_submit_button("✖ Cancel")
-
         if save:
-            payload = {
-                "title": e_title.strip(),
-                "subject": e_subject.strip(),
-                "task_type": e_type,
-                "deadline": datetime.combine(e_date, e_time).isoformat(),
-                "weightage": e_weight,
-                "notes": e_notes.strip() or None,
-            }
+            payload = {"title": e_title.strip(), "subject": e_subject.strip(), "task_type": e_type, "deadline": datetime.combine(e_date, e_time).isoformat(), "weightage": e_weight, "notes": e_notes.strip() or None}
             if api_update(et["id"], payload):
                 st.success("✅ Task updated.")
-                st.session_state.pop("editing_id", None)
-                st.session_state.pop("editing_task", None)
-                st.cache_data.clear()
-                st.rerun()
+                st.session_state.pop("editing_id", None); st.session_state.pop("editing_task", None)
+                st.cache_data.clear(); st.rerun()
         if cancel:
-            st.session_state.pop("editing_id", None)
-            st.session_state.pop("editing_task", None)
-            st.rerun()
-
-
-# ---------------------------------------------------------------------------
-# Legend
-# ---------------------------------------------------------------------------
+            st.session_state.pop("editing_id", None); st.session_state.pop("editing_task", None); st.rerun()
 
 def render_legend():
-    st.markdown(
-        """
-        <div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center;font-size:0.8rem;color:#94a3b8">
-          <span>Row colours:</span>
-          <span style="background:rgba(239,68,68,0.25);border-left:4px solid #ef4444;padding:2px 10px;border-radius:4px">💀 Overdue</span>
-          <span style="background:rgba(239,68,68,0.12);border-left:4px solid #f97316;padding:2px 10px;border-radius:4px">🔴 Critical (&lt;24 h)</span>
-          <span style="background:rgba(234,179,8,0.12);border-left:4px solid #eab308;padding:2px 10px;border-radius:4px">🟡 Warning (&lt;72 h)</span>
-          <span style="background:rgba(34,197,94,0.08);border-left:4px solid #22c55e;padding:2px 10px;border-radius:4px">🟢 Normal</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-# ---------------------------------------------------------------------------
-# Weightage chart
-# ---------------------------------------------------------------------------
+    st.markdown("""<div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center;font-size:0.8rem;color:#94a3b8"><span>Row colours:</span><span style="background:rgba(239,68,68,0.25);border-left:4px solid #ef4444;padding:2px 10px;border-radius:4px">💀 Overdue</span><span style="background:rgba(239,68,68,0.12);border-left:4px solid #f97316;padding:2px 10px;border-radius:4px">🔴 Critical (&lt;24 h)</span><span style="background:rgba(234,179,8,0.12);border-left:4px solid #eab308;padding:2px 10px;border-radius:4px">🟡 Warning (&lt;72 h)</span><span style="background:rgba(34,197,94,0.08);border-left:4px solid #22c55e;padding:2px 10px;border-radius:4px">🟢 Normal</span></div>""", unsafe_allow_html=True)
 
 def render_weightage_chart(tasks: list[dict]):
-    if not tasks:
-        return
-    
-    # Aggregate weightage by subject
+    if not tasks: return
     subject_weight = {}
     for t in tasks:
-        subj = t.get("subject", "Unknown")
-        weight = t.get("weightage", 0)
+        subj = t.get("subject", "Unknown"); weight = t.get("weightage", 0)
         subject_weight[subj] = subject_weight.get(subj, 0) + weight
-        
-    # Sort by weightage descending
     sorted_subjects = dict(sorted(subject_weight.items(), key=lambda item: item[1], reverse=True))
-    
     st.markdown("### 📊 Weightage by Subject")
     st.bar_chart(sorted_subjects)
 
+# ---------------------------------------------------------------------------
+# CGPA Calculator
+# ---------------------------------------------------------------------------
+
+def render_cgpa_calculator():
+    st.markdown("""<div style="padding:1.5rem 0 0.5rem"><h1 style="font-size:2.4rem;font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.2rem">🔢 CGPA Calculator</h1><p style="color:#64748b;font-size:1rem">Calculate your Academic Standing.</p></div>""", unsafe_allow_html=True)
+    grade_scale = {'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0}
+    if 'courses' not in st.session_state: st.session_state.courses = [{'name': '', 'credits': 3.0, 'grade': 'A'} for _ in range(3)]
+    st.markdown("### 🎓 Course List")
+    for i in range(len(st.session_state.courses)):
+        c1, c2, c3, c4 = st.columns([3, 1, 1, 0.5])
+        with c1: st.session_state.courses[i]['name'] = st.text_input(f"Course Name #{i+1}", value=st.session_state.courses[i]['name'], key=f"name_{i}")
+        with c2: st.session_state.courses[i]['credits'] = st.number_input(f"Credits", min_value=0.0, step=0.5, value=st.session_state.courses[i]['credits'], key=f"credits_{i}")
+        with c3:
+            gl = list(grade_scale.keys())
+            st.session_state.courses[i]['grade'] = st.selectbox(f"Grade", gl, index=gl.index(st.session_state.courses[i]['grade']), key=f"grade_{i}")
+        with c4:
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("🗑️", key=f"del_{i}"): st.session_state.courses.pop(i); st.rerun()
+    if st.button("➕ Add Another Course"): st.session_state.courses.append({'name': '', 'credits': 3.0, 'grade': 'A'}); st.rerun()
+    st.markdown("---")
+    if st.button("🧮 Calculate CGPA", use_container_width=True):
+        tp = 0; tc = 0
+        for c in st.session_state.courses:
+            tp += (grade_scale[c['grade']] * c['credits']); tc += c['credits']
+        if tc > 0:
+            cgpa = tp / tc; r1, r2, r3 = st.columns(3)
+            r1.metric("Total Credits", f"{tc:.1f}"); r2.metric("CGPA", f"{cgpa:.2f}")
+            standing = "Excellent 🌟" if cgpa >= 3.5 else "Good 👍" if cgpa >= 2.5 else "Needs Improvement ⚠️"
+            r3.metric("Standing", standing)
+            if cgpa >= 3.5: st.balloons()
+        else: st.error("Please add courses with credits > 0")
+    if st.button("🔄 Reset Calculator"): st.session_state.courses = [{'name': '', 'credits': 3.0, 'grade': 'A'} for _ in range(3)]; st.rerun()
 
 # ---------------------------------------------------------------------------
 # Main app
 # ---------------------------------------------------------------------------
 
 def main():
-    # ── Header ─────────────────────────────────────────────────────────────
-    st.markdown(
-        """
-        <div style="text-align:center;padding:1.5rem 0 0.5rem">
-          <h1 style="font-size:2.4rem;font-weight:700;
-                     background:linear-gradient(90deg,#a78bfa,#60a5fa);
-                     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                     margin-bottom:0.2rem">
-            🎓 Academic Assessment Tracker
-          </h1>
-          <p style="color:#64748b;font-size:1rem">Stay ahead of every deadline.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.sidebar.title("⋮ Menu")
+    page = st.sidebar.selectbox("Go to", ["🏠 Dashboard", "➕ Add Assignment", "🔢 CGPA Calculator"])
 
-    # ── Backend connectivity check ─────────────────────────────────────────
-    try:
-        health = requests.get(f"{API_BASE_URL}/health", timeout=3)
-        if not health.ok:
-            raise ConnectionError
-        st.success(f"🟢 API connected at `{API_BASE_URL}`", icon=None)
-    except Exception:
-        st.error(
-            f"⚠️ Cannot reach API at `{API_BASE_URL}`. "
-            "Start it with: `python api.py`",
-            icon="🚨",
-        )
+    if page == "🏠 Dashboard":
+        st.markdown("""<div style="text-align:center;padding:1.5rem 0 0.5rem"><h1 style="font-size:2.4rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.2rem">🎓 Academic Dashboard</h1><p style="color:#64748b;font-size:1rem">Stay ahead of every deadline.</p></div>""", unsafe_allow_html=True)
+        try:
+            health = requests.get(f"{API_BASE_URL}/health", timeout=3)
+            if health.ok: st.success(f"🟢 System Online", icon=None)
+        except: st.error(f"⚠️ System Offline. Start api.py", icon="🚨")
 
-    # ── Fetch data ──────────────────────────────────────────────────────────
-    all_tasks = fetch_tasks()
-    stats     = fetch_stats()
+        all_tasks = fetch_tasks(); stats = fetch_stats()
+        sel_subjects, sel_types, hide_done = sidebar_filters(all_tasks)
 
-    # ── Sidebar ─────────────────────────────────────────────────────────────
-    sidebar_form()
-    sel_subjects, sel_types, hide_done = sidebar_filters(all_tasks)
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("📋 Total", stats.get("total", 0)); m2.metric("💀 Overdue", stats.get("overdue", 0))
+        m3.metric("🔴 Critical", stats.get("critical", 0)); m4.metric("🟡 Warning", stats.get("upcoming", 0))
+        m5.metric("⚖️ Weight", f"{stats.get('total_weightage', 0):.1f}%")
 
-    # ── Metrics row ─────────────────────────────────────────────────────────
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("📋 Total Tasks",   stats.get("total", 0))
-    m2.metric("💀 Overdue",       stats.get("overdue", 0),   delta=None)
-    m3.metric("🔴 Critical (<24h)", stats.get("critical", 0))
-    m4.metric("🟡 Warning (<72h)", stats.get("upcoming", 0))
-    m5.metric("⚖️ Total Weight",  f"{stats.get('total_weightage', 0):.1f}%")
+        st.markdown("<br>", unsafe_allow_html=True)
+        filtered = [t for t in all_tasks if t["subject"] in sel_subjects and t["task_type"] in sel_types and (not hide_done or hours_left(t.get("deadline", "")) >= 0)]
 
-    st.markdown("<br>", unsafe_allow_html=True)
+        tab_all, tab_critical, tab_chart = st.tabs(["📋 All Tasks", "🔴 Critical", "📊 Analytics"])
+        with tab_all:
+            st.markdown(f"**{len(filtered)} task(s)**")
+            render_task_table(filtered); render_legend(); render_manage_panel(all_tasks)
+        with tab_critical:
+            urgent = [t for t in filtered if urgency_label(hours_left(t.get("deadline", ""))) in ("critical", "overdue")]
+            if urgent: render_task_table(urgent)
+            else: st.success("✅ No critical tasks!")
+        with tab_chart: render_weightage_chart(filtered)
 
-    # ── Apply filters ────────────────────────────────────────────────────────
-    filtered = [
-        t for t in all_tasks
-        if t["subject"]   in sel_subjects
-        and t["task_type"] in sel_types
-        and (not hide_done or hours_left(t.get("deadline", "")) >= 0)
-    ]
-
-    # ── Tab layout ───────────────────────────────────────────────────────────
-    tab_all, tab_critical, tab_chart = st.tabs(
-        ["📋 All Tasks", "🔴 Critical / Overdue", "📊 Analytics"]
-    )
-
-    with tab_all:
-        st.markdown(f"**{len(filtered)} task(s)** — sorted by nearest deadline")
-        render_task_table(filtered)
-        render_legend()
-        render_manage_panel(all_tasks)
-
-    with tab_critical:
-        urgent = [t for t in filtered if urgency_label(hours_left(t.get("deadline", ""))) in ("critical", "overdue")]
-        if urgent:
-            st.warning(f"⚠️ You have **{len(urgent)}** task(s) that need immediate attention!")
-            render_task_table(urgent)
-        else:
-            st.success("✅ No critical or overdue tasks — great job!")
-
-    with tab_chart:
-        render_weightage_chart(filtered)
-        if filtered:
-            raw_data = []
-            for t in filtered:
-                hl = hours_left(t.get("deadline", ""))
-                urg = urgency_label(hl)
-                raw_data.append({
-                    "id": t.get("id"),
-                    "title": t.get("title"),
-                    "subject": t.get("subject"),
-                    "task_type": t.get("task_type"),
-                    "deadline": t.get("deadline"),
-                    "weightage": t.get("weightage"),
-                    "urgency": urg
-                })
-            st.markdown("### 🗂️ Raw Data")
-            st.dataframe(
-                raw_data,
-                use_container_width=True,
-                hide_index=True,
-            )
-
+    elif page == "➕ Add Assignment":
+        render_add_assignment()
+    else:
+        render_cgpa_calculator()
 
 if __name__ == "__main__":
     main()

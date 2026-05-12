@@ -3,9 +3,8 @@ import sys
 import time
 
 requirements = [
-    "fastapi==0.95.2",
-    "uvicorn",
-    "streamlit",
+    "Flask==2.3.2",
+    "Flask-CORS==4.0.0",
     "pydantic<2.0.0",
     "requests"
 ]

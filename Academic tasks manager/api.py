@@ -39,6 +39,18 @@ def serve_index():
     return send_file('index.html', mimetype='text/html')
 
 
+@app.route("/cgpa", methods=["GET"])
+def serve_cgpa():
+    """Serve the CGPA calculator page."""
+    return send_file('cgpa.html', mimetype='text/html')
+
+
+@app.route("/add-task", methods=["GET"])
+def serve_add_task():
+    """Serve the Add Task page."""
+    return send_file('add-task.html', mimetype='text/html')
+
+
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify({"status": "ok", "service": "Academic Assessment Tracker"})
