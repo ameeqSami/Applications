@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Academic Task Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#0A0A0B',
+                            surface: 'rgba(255, 255, 255, 0.03)',
+                            accent: '#8B5CF6',
+                            acid: '#A8FF35',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0A0A0B; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+        .glass-widget {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+        input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: border-color 0.2s;
+        }
+        input:focus { outline: none; border-color: #8B5CF6; }
+    </style>
+</head>
+<body class="min-h-screen w-full flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold tracking-widest text-brand-acid uppercase">SYS.TASK_MANAGER</h1>
+            <p class="text-xs uppercase tracking-widest opacity-50 mt-2">New Identity Registration</p>
+        </div>
+        
+        <div class="glass-widget">
+            <h2 class="text-xl font-bold tracking-widest text-brand-accent mb-6 uppercase">Create Account</h2>
+            
+            {% if error %}
+            <div class="mb-4 p-3 rounded bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/register" class="flex flex-col gap-5">
+                <div>
+                    <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Select Username</label>
+                    <input type="text" name="username" class="w-full p-3 rounded-lg text-sm" placeholder="Enter username" required autofocus>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Create Password</label>
+                    <input type="password" name="password" class="w-full p-3 rounded-lg text-sm" placeholder="Enter secure password" required>
+                </div>
+                <button type="submit" class="mt-4 w-full p-3 bg-brand-acid text-black font-bold rounded-lg hover:bg-opacity-80 transition-colors uppercase tracking-widest text-sm focus:outline-none">
+                    Register Identity
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center text-xs opacity-70">
+                Already registered? <a href="/login" class="text-brand-accent hover:underline ml-1 focus:outline-none">Return to Login</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
