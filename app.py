@@ -11,7 +11,7 @@ DB_FILE = 'database.json'
 
 def load_db():
     if not os.path.exists(DB_FILE):
-        return {'users': [], 'tasks': []}
+        return {'users': [], 'tasks': [], 'timetables': {}}
     with open(DB_FILE, 'r') as f:
         try:
             data = json.load(f)
@@ -22,9 +22,11 @@ def load_db():
                 data['users'] = []
             if 'tasks' not in data:
                 data['tasks'] = []
+            if 'timetables' not in data:
+                data['timetables'] = {}
             return data
         except:
-            return {'users': [], 'tasks': []}
+            return {'users': [], 'tasks': [], 'timetables': {}}
 
 def save_db(data):
     with open(DB_FILE, 'w') as f:
@@ -149,6 +151,50 @@ def cgpa():
 def reminder():
     return render_template('reminder.html')
 
+@app.route('/timetable')
+@login_required
+def timetable():
+    return render_template('timetable.html', username=session.get('username'))
+
+@app.route('/chat')
+@login_required
+def chat():
+    return render_template('chat.html', username=session.get('username'))
+
+@app.route('/api/timetable', methods=['GET'])
+def get_timetable_api():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    db = load_db()
+    user_id = str(session['user_id'])
+    timetable_data = db['timetables'].get(user_id, [])
+    return jsonify(timetable_data)
+
+@app.route('/api/timetable', methods=['POST'])
+def save_timetable_api():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    db = load_db()
+    user_id = str(session['user_id'])
+    db['timetables'][user_id] = data
+    save_db(db)
+    return jsonify({"status": "success"}), 200
+
+@app.route('/api/chat', methods=['POST'])
+def chat_api():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    user_message = data.get('message', '').strip()
+    
+    # Mock AI response. Integrate real LLM API here (like Gemini or OpenAI)
+    ai_reply = f"System recognized input: '{user_message}'. As your academic AI assistant, I'm currently in simulation mode. Connect an API key to enable full neural capabilities."
+    
+    return jsonify({"reply": ai_reply}), 200
+
 @app.route('/api/tasks', methods=['GET'])
 def get_tasks_api():
     if 'user_id' not in session:
@@ -239,6 +285,6 @@ def delete_task_api(task_id):
 
 if __name__ == '__main__':
     if not os.path.exists(DB_FILE):
-        db = {'users': [], 'tasks': []}
+        db = {'users': [], 'tasks': [], 'timetables': {}}
         save_db(db)
     app.run(debug=True, port=8000)

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS.AI Chat | Academic Task Manager</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#0A0A0B',
+                            surface: 'rgba(255, 255, 255, 0.03)',
+                            accent: '#8B5CF6',
+                            acid: '#A8FF35',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0A0A0B;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass-widget {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3); 
+        }
+        
+        input:focus {
+            outline: none;
+        }
+        
+        .msg-user {
+            background-color: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        
+        .msg-ai {
+            background-color: rgba(168, 255, 53, 0.05);
+            border: 1px solid rgba(168, 255, 53, 0.2);
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            color: #A8FF35;
+        }
+    </style>
+</head>
+<body class="h-screen w-full overflow-hidden p-4 md:p-8 flex flex-col gap-6">
+
+    <header class="flex justify-between items-center px-2 relative z-50">
+        <div class="flex items-center gap-4">
+            <button id="menu-btn" class="focus:outline-none hover:text-brand-acid transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <h1 class="text-xl font-bold tracking-widest text-brand-acid hidden sm:block">SYS.AI_CORE</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-xs uppercase tracking-widest text-brand-accent px-2 py-1 border border-white/10 rounded bg-white/5">USER: {{ username }}</div>
+            <div class="text-sm opacity-50 hidden md:block" id="current-time"></div>
+        </div>
+
+        <div id="menu-dropdown" class="absolute top-10 left-2 w-48 bg-[#0A0A0B] border border-white/10 rounded-lg shadow-2xl hidden flex-col z-50 overflow-hidden" style="backdrop-filter: blur(15px); background-color: rgba(10, 10, 11, 0.9);">
+            <a href="/" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Dashboard</a>
+            <a href="/timetable" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Timetable</a>
+            <a href="/chat" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">SYS.AI Chat</a>
+            <a href="/reminder" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Set Reminder</a>
+            <a href="/cgpa" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">CGPA Calculator</a>
+            <a href="/logout" class="px-4 py-3 text-sm hover:bg-red-500/20 text-red-400 transition-colors">Logout</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col overflow-hidden max-w-4xl mx-auto w-full glass-widget !p-0">
+        
+        <!-- Chat Area -->
+        <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-4" id="chat-box">
+            <!-- Initial AI Greeting -->
+            <div class="msg-ai max-w-[80%] p-4 rounded-xl text-sm leading-relaxed">
+                [SYSTEM INITIATED] <br><br>
+                Greetings, {{ username }}. I am your dedicated academic AI interface. How may I assist you with your scheduling, tasks, or studies today?
+            </div>
+        </div>
+
+        <!-- Input Terminal -->
+        <form id="chat-form" class="border-t border-white/10 p-4 bg-black/40 flex items-center gap-3">
+            <span class="text-brand-acid ml-2 opacity-70">❯</span>
+            <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-sm placeholder-white/30 text-white focus:ring-0 px-2 py-2" placeholder="Query the system..." autocomplete="off" required>
+            <button type="submit" class="px-4 py-2 bg-white/5 border border-white/10 hover:border-brand-acid hover:text-brand-acid transition-all rounded text-xs tracking-widest uppercase focus:outline-none">
+                Transmit
+            </button>
+        </form>
+
+    </main>
+
+    <script>
+        // Update Time
+        function updateTime() {
+            document.getElementById('current-time').innerText = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Menu Dropdown
+        const menuBtn = document.getElementById('menu-btn');
+        const menuDropdown = document.getElementById('menu-dropdown');
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('hidden');
+            menuDropdown.classList.toggle('flex');
+        });
+        document.addEventListener('click', (e) => {
+            if (!menuDropdown.classList.contains('hidden') && !menuDropdown.contains(e.target)) {
+                menuDropdown.classList.add('hidden');
+                menuDropdown.classList.remove('flex');
+            }
+        });
+
+        // Chat Logic
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatBox = document.getElementById('chat-box');
+
+        function addMessage(msg, isUser) {
+            const div = document.createElement('div');
+            div.className = `${isUser ? 'msg-user' : 'msg-ai'} max-w-[80%] p-4 rounded-xl text-sm leading-relaxed opacity-0 transition-opacity duration-300`;
+            div.innerHTML = isUser ? msg : `[SYS.AI] <br>${msg}`;
+            chatBox.appendChild(div);
+            
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // Fade in effect
+            setTimeout(() => {
+                div.classList.remove('opacity-0');
+            }, 50);
+        }
+
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.id = 'typing-indicator';
+            div.className = `msg-ai max-w-[80%] p-4 rounded-xl text-sm leading-relaxed opacity-50`;
+            div.innerHTML = `<span class="animate-pulse">Processing query...</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('typing-indicator');
+            if(el) el.remove();
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message to UI
+            addMessage(message, true);
+            chatInput.value = '';
+            
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                removeTypingIndicator();
+                
+                if(data.reply) {
+                    addMessage(data.reply, false);
+                } else {
+                    addMessage("Error: Neural link disconnected.", false);
+                }
+            } catch (err) {
+                console.error(err);
+                removeTypingIndicator();
+                addMessage("Critical system failure. Cannot reach AI core.", false);
+            }
+        });
+    </script>
+</body>
+</html>
