@@ -106,7 +106,7 @@
         </div>
     </header>
 
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
         
         <!-- Widget A (The Pulse) -->
         <section class="glass-widget flex flex-col gap-6 lg:col-span-1 overflow-y-auto">
@@ -149,10 +149,33 @@
 
         <!-- Widget B (Chronos Timeline) -->
         <section class="glass-widget flex flex-col lg:col-span-2 overflow-hidden">
-            <h2 class="text-sm tracking-wider uppercase opacity-70 mb-4">Chronos Timeline</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm tracking-wider uppercase opacity-70">Chronos Timeline</h2>
+                <button onclick="openCreateReminderModal()" class="text-brand-acid hover:text-white transition-colors focus:outline-none" title="Add Reminder">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
+            </div>
             
             <div class="flex-1 overflow-y-auto pr-2 space-y-4" id="task-list">
                 <!-- Tasks will be injected here -->
+            </div>
+        </section>
+
+        <!-- Widget D (Quick Todo List) -->
+        <section class="glass-widget flex flex-col lg:col-span-1 overflow-hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm tracking-wider uppercase opacity-70">Quick List</h2>
+                <button onclick="openCreateQuickTodoModal()" class="text-brand-acid hover:text-white transition-colors focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto pr-2 space-y-2" id="quick-todo-list">
+                <!-- Simple todos will be injected here -->
             </div>
         </section>
 
@@ -164,7 +187,101 @@
         <input type="text" id="terminal-input" class="w-full bg-transparent border-none text-sm placeholder-white/30" placeholder="Task String (e.g., DSA Quiz, 2026-05-20, High)... Press Enter to submit" autocomplete="off">
     </section>
 
+    <!-- Create Reminder Modal -->
+    <div id="create-reminder-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCreateReminderModal()"></div>
+        <div class="glass-widget relative w-full max-w-md shadow-2xl flex flex-col gap-4 border border-white/20">
+            <button onclick="closeCreateReminderModal()" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h2 class="text-xl font-bold tracking-widest text-brand-accent mb-2">NEW REMINDER</h2>
+            
+            <form id="popup-reminder-form" class="flex flex-col gap-4">
+                <div>
+                    <input type="text" id="popup-title" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm placeholder-white/30 focus:border-brand-acid transition-colors text-white" placeholder="Task Title" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="popup-category" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm focus:border-brand-acid transition-colors text-white">
+                        <option value="Assignment">Assignment</option>
+                        <option value="Project">Project</option>
+                        <option value="Study" selected>Study</option>
+                        <option value="Exam">Exam</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    
+                    <select id="popup-priority" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm focus:border-brand-acid transition-colors text-white">
+                        <option value="Normal" selected>Normal</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+
+                <div>
+                    <input type="datetime-local" id="popup-datetime" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm focus:border-brand-acid transition-colors text-white" required>
+                </div>
+                
+                <div>
+                    <textarea id="popup-description" rows="3" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm placeholder-white/30 focus:border-brand-acid transition-colors text-white" placeholder="Description..."></textarea>
+                </div>
+                
+                <button type="submit" class="w-full p-2 mt-2 bg-brand-accent text-white font-bold rounded hover:bg-opacity-80 transition-colors uppercase tracking-widest text-sm">
+                    Create Reminder
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Quick Todo Modal -->
+    <div id="create-quick-todo-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCreateQuickTodoModal()"></div>
+        <div class="glass-widget relative w-full max-w-sm shadow-2xl flex flex-col gap-4 border border-white/20">
+            <button onclick="closeCreateQuickTodoModal()" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h2 class="text-lg font-bold tracking-widest text-brand-acid mb-2">QUICK TODO</h2>
+            
+            <form id="popup-quick-todo-form" class="flex flex-col gap-4">
+                <div>
+                    <input type="text" id="popup-quick-title" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm placeholder-white/30 focus:border-brand-acid transition-colors text-white" placeholder="Task Title" required>
+                </div>
+                <div>
+                    <textarea id="popup-quick-desc" rows="2" class="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm placeholder-white/30 focus:border-brand-acid transition-colors text-white" placeholder="Description (Optional)"></textarea>
+                </div>
+                <button type="submit" class="w-full p-2 mt-2 bg-brand-acid/20 text-brand-acid font-bold rounded hover:bg-opacity-80 transition-colors uppercase tracking-widest text-sm">
+                    Add Task
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="task-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeTaskModal()"></div>
+        <div class="glass-widget relative w-full max-w-lg shadow-2xl flex flex-col gap-4 border border-white/20">
+            <button onclick="closeTaskModal()" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="flex items-center gap-3 pr-8">
+                <span id="modal-category" class="text-xs uppercase tracking-widest text-brand-accent px-2 py-1 border border-white/10 rounded bg-white/5"></span>
+                <span id="modal-priority" class="text-xs uppercase tracking-widest px-2 py-1 border border-white/10 rounded bg-white/5"></span>
+            </div>
+            <h2 id="modal-title" class="text-xl md:text-2xl font-bold tracking-wider text-brand-acid"></h2>
+            <div class="text-sm opacity-60 flex gap-2 items-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span id="modal-deadline"></span>
+            </div>
+            <div class="bg-black/20 p-4 rounded-lg border border-white/5 min-h-[100px] mt-2 max-h-[40vh] overflow-y-auto">
+                <p id="modal-description" class="text-sm text-white/80 whitespace-pre-wrap leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let allTasks = [];
+
         // Update Time
         function updateTime() {
             document.getElementById('current-time').innerText = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
@@ -192,6 +309,7 @@
             try {
                 const res = await fetch('/api/tasks');
                 const tasks = await res.json();
+                allTasks = tasks;
                 renderTasks(tasks);
                 updatePulse(tasks);
             } catch (err) {
@@ -218,15 +336,17 @@
                 const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
                 const el = document.createElement('div');
-                el.className = `p-4 rounded-lg bg-white/5 border border-white/10 flex justify-between items-center transition-all hover:bg-white/10 ${glowClass} ${opacityClass}`;
+                el.className = `p-4 rounded-lg bg-white/5 border border-white/10 flex justify-between items-center transition-all hover:bg-white/10 cursor-pointer ${glowClass} ${opacityClass}`;
+                el.onclick = () => openTaskModal(task.id);
                 
                 el.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <button onclick="toggleComplete(${task.id}, '${task.status}')" class="w-5 h-5 rounded border border-white/30 flex items-center justify-center hover:border-brand-acid transition-colors focus:outline-none">
+                        <button onclick="event.stopPropagation(); toggleComplete(${task.id}, '${task.status}')" class="w-5 h-5 rounded border border-white/30 flex items-center justify-center hover:border-brand-acid transition-colors focus:outline-none">
                             ${isCompleted ? '<div class="w-3 h-3 bg-brand-acid rounded-sm"></div>' : ''}
                         </button>
                         <div>
                             <div class="font-bold text-sm md:text-base">${task.title}</div>
+                            ${task.description ? `<div class="text-xs mt-1 text-white/70 truncate max-w-[200px] sm:max-w-xs">${task.description}</div>` : ''}
                             <div class="text-xs opacity-60 flex gap-3 mt-1">
                                 <span>[${task.category}]</span>
                                 <span>DL: ${dateStr} ${timeStr}</span>
@@ -238,7 +358,7 @@
                             <span class="px-2 py-1 rounded bg-white/5 border border-white/10 uppercase tracking-wide ${task.priority === 'High' || task.priority === 'Critical' ? 'text-brand-accent' : ''}">${task.priority}</span>
                         </div>
                         <div class="${statusColor} uppercase tracking-wider w-20 text-right">${task.status}</div>
-                        <button onclick="deleteTask(${task.id})" class="text-white/30 hover:text-red-400 transition-colors ml-2">
+                        <button onclick="event.stopPropagation(); deleteTask(${task.id})" class="text-white/30 hover:text-red-400 transition-colors ml-2 focus:outline-none">
                             ✕
                         </button>
                     </div>
@@ -296,6 +416,116 @@
             fetchTasks();
         }
 
+        // Task Modal Logic
+        function openTaskModal(taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            document.getElementById('modal-category').parentElement.classList.remove('hidden');
+            document.getElementById('modal-deadline').parentElement.classList.remove('hidden');
+            
+            document.getElementById('modal-title').innerText = task.title;
+            document.getElementById('modal-category').innerText = task.category;
+            
+            const priorityEl = document.getElementById('modal-priority');
+            priorityEl.innerText = task.priority;
+            priorityEl.className = `text-xs uppercase tracking-widest px-2 py-1 border border-white/10 rounded bg-white/5 ${task.priority === 'High' || task.priority === 'Critical' ? 'text-brand-accent' : ''}`;
+            
+            const dateObj = new Date(task.deadline);
+            document.getElementById('modal-deadline').innerText = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const descEl = document.getElementById('modal-description');
+            descEl.innerText = task.description || 'No description provided.';
+            if (!task.description) {
+                descEl.classList.add('opacity-50', 'italic');
+            } else {
+                descEl.classList.remove('opacity-50', 'italic');
+            }
+            
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        function openQuickTodoModal(index) {
+            const todo = quickTodos[index];
+            if (!todo) return;
+            
+            document.getElementById('modal-category').parentElement.classList.add('hidden');
+            document.getElementById('modal-deadline').parentElement.classList.add('hidden');
+            
+            document.getElementById('modal-title').innerText = todo.text;
+            
+            const descEl = document.getElementById('modal-description');
+            descEl.innerText = todo.description || 'No description provided.';
+            if (!todo.description) {
+                descEl.classList.add('opacity-50', 'italic');
+            } else {
+                descEl.classList.remove('opacity-50', 'italic');
+            }
+            
+            document.getElementById('task-modal').classList.remove('hidden');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('task-modal').classList.contains('hidden')) {
+                    closeTaskModal();
+                }
+                if (!document.getElementById('create-reminder-modal').classList.contains('hidden')) {
+                    closeCreateReminderModal();
+                }
+                if (!document.getElementById('create-quick-todo-modal').classList.contains('hidden')) {
+                    closeCreateQuickTodoModal();
+                }
+            }
+        });
+
+        // Create Reminder Modal Logic
+        function openCreateReminderModal() {
+            document.getElementById('create-reminder-modal').classList.remove('hidden');
+        }
+
+        function closeCreateReminderModal() {
+            document.getElementById('create-reminder-modal').classList.add('hidden');
+            document.getElementById('popup-reminder-form').reset();
+        }
+
+        document.getElementById('popup-reminder-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('popup-title').value;
+            const datetime = document.getElementById('popup-datetime').value;
+            const category = document.getElementById('popup-category').value;
+            const description = document.getElementById('popup-description').value;
+            const priority = document.getElementById('popup-priority').value;
+            
+            const dateObj = new Date(datetime);
+            const isoString = dateObj.toISOString();
+            
+            try {
+                await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        deadline: isoString,
+                        category: category,
+                        status: 'Active',
+                        priority: priority
+                    })
+                });
+                
+                closeCreateReminderModal();
+                fetchTasks();
+            } catch (err) {
+                console.error("Error creating reminder", err);
+            }
+        });
+
         // Terminal Input
         document.getElementById('terminal-input').addEventListener('keydown', async function(e) {
             if (e.key === 'Enter' && this.value.trim() !== '') {
@@ -312,6 +542,76 @@
                 fetchTasks();
             }
         });
+
+        // Quick Todo List Logic (Local Storage)
+        const quickTodoBtn = document.getElementById('add-quick-todo-btn');
+        const quickTodoInputContainer = document.getElementById('quick-todo-input-container');
+        const quickTodoInput = document.getElementById('quick-todo-input');
+        const quickTodoList = document.getElementById('quick-todo-list');
+        
+        let quickTodos = JSON.parse(localStorage.getItem('quickTodos')) || [];
+
+        function renderQuickTodos() {
+            quickTodoList.innerHTML = '';
+            quickTodos.forEach((todo, index) => {
+                const el = document.createElement('div');
+                el.className = `flex flex-col p-2 rounded bg-white/5 border border-white/10 group cursor-pointer hover:bg-white/10 transition-colors ${todo.completed ? 'opacity-50' : ''}`;
+                el.onclick = () => openQuickTodoModal(index);
+                
+                el.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <button onclick="event.stopPropagation(); toggleQuickTodo(${index})" class="min-w-[16px] w-4 h-4 rounded-sm border border-white/30 flex items-center justify-center hover:border-brand-acid transition-colors focus:outline-none">
+                                ${todo.completed ? '<div class="w-2 h-2 bg-brand-acid rounded-sm"></div>' : ''}
+                            </button>
+                            <span class="text-sm truncate font-bold ${todo.completed ? 'line-through' : ''}">${todo.text}</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); deleteQuickTodo(${index})" class="text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    ${todo.description ? `<div class="text-xs text-white/50 ml-7 mt-1 truncate max-w-[180px] sm:max-w-[220px]">${todo.description}</div>` : ''}
+                `;
+                quickTodoList.appendChild(el);
+            });
+        }
+
+        function openCreateQuickTodoModal() {
+            document.getElementById('create-quick-todo-modal').classList.remove('hidden');
+            document.getElementById('popup-quick-title').focus();
+        }
+
+        function closeCreateQuickTodoModal() {
+            document.getElementById('create-quick-todo-modal').classList.add('hidden');
+            document.getElementById('popup-quick-todo-form').reset();
+        }
+
+        document.getElementById('popup-quick-todo-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('popup-quick-title').value.trim();
+            const desc = document.getElementById('popup-quick-desc').value.trim();
+            
+            if (title !== '') {
+                quickTodos.push({ text: title, description: desc, completed: false });
+                localStorage.setItem('quickTodos', JSON.stringify(quickTodos));
+                renderQuickTodos();
+                closeCreateQuickTodoModal();
+            }
+        });
+
+        window.toggleQuickTodo = (index) => {
+            quickTodos[index].completed = !quickTodos[index].completed;
+            localStorage.setItem('quickTodos', JSON.stringify(quickTodos));
+            renderQuickTodos();
+        };
+
+        window.deleteQuickTodo = (index) => {
+            quickTodos.splice(index, 1);
+            localStorage.setItem('quickTodos', JSON.stringify(quickTodos));
+            renderQuickTodos();
+        };
+
+        renderQuickTodos();
 
         // Init
         fetchTasks();

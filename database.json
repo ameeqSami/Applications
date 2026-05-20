@@ -9,7 +9,104 @@
             "id": 2,
             "username": "ameeqsami",
             "password": "scrypt:32768:8:1$hXmtGUSE6k3ysnE6$34f4e67ff138d1384616895b37553354a73e24005cfb076a0d2c1b84b12668b04f425fd0d0f874b72542975344b36834aa1a3d618129b6ba018aea1bb0bf5e7b"
+        },
+        {
+            "id": 3,
+            "username": "xreshx",
+            "password": "scrypt:32768:8:1$lurw5hdUvkcEEKVR$d1e50977494d33c26b9bdc3717e8bedd2520c5b9306bc7f32f4efb83a5b70100a4c05148aa1537fe804cd302f121b43537cc1fd0c7ebb17ff550e9088f9e5d2e"
+        },
+        {
+            "id": 4,
+            "username": "Aleeshah",
+            "password": "scrypt:32768:8:1$byWxqAyiExq27aDh$6cd4ba55ef65d800114663bf578fa0e0ce3d20546aceb3965ea9f8983738b5db4edd40604a14665939b1c8bc9892c7c901838b9f3b8abce8adf72530ab6a42d4"
+        },
+        {
+            "id": 5,
+            "username": "Amina",
+            "password": "scrypt:32768:8:1$Ob6Sy5kjCLXWwN7h$f44f5775998f0c1b79d482518fcf32684d5107de48d8660b147d8ab0a7beeaee572160ee64d05dbd480c9dc7fac2b75684f6461a98088f50186bdc06c4ad14c5"
+        },
+        {
+            "id": 6,
+            "username": "AbuBakar",
+            "password": "scrypt:32768:8:1$FsOEPHVguUP02fwJ$e7681908bf2e0465f9086eba3b706d385a6b7bcf5bd2a96325cf5c9a4eb3be103c3c435a8e70713d1a7e2f87d1cc188f2edb95bdbe7e4b2ab62589d27bb85212"
         }
     ],
-    "tasks": []
+    "tasks": [
+        {
+            "id": 1,
+            "user_id": 3,
+            "title": "IDKKK 1 ",
+            "deadline": "2026-05-20T14:02:00.000Z",
+            "category": "Study",
+            "status": "Completed",
+            "priority": "Normal",
+            "urgency_flag": false
+        },
+        {
+            "id": 2,
+            "user_id": 3,
+            "title": "idkkk 2",
+            "deadline": "2026-05-20T14:02:00.000Z",
+            "category": "Study",
+            "status": "Completed",
+            "priority": "Critical",
+            "urgency_flag": false
+        },
+        {
+            "id": 3,
+            "user_id": 3,
+            "title": "Idkkkk 3 ",
+            "deadline": "2026-05-12T14:02:00.000Z",
+            "category": "Study",
+            "status": "Completed",
+            "priority": "Normal",
+            "urgency_flag": false
+        },
+        {
+            "id": 4,
+            "user_id": 4,
+            "title": "Database lab quiz ",
+            "deadline": "2026-05-18T09:00:00.000Z",
+            "category": "Study",
+            "status": "Active",
+            "priority": "Normal",
+            "urgency_flag": true
+        },
+        {
+            "id": 5,
+            "user_id": 5,
+            "title": "Online class",
+            "deadline": "2026-05-15T09:00:00.000Z",
+            "category": "Study",
+            "status": "Overdue",
+            "priority": "Normal",
+            "urgency_flag": true
+        }
+    ],
+    "timetables": {
+        "5": {
+            "Monday": [],
+            "Tuesday": [],
+            "Wednesday": [],
+            "Thursday": [
+                {
+                    "id": 1778688311161,
+                    "subject": "Computer Networks",
+                    "start": "08:00",
+                    "end": "09:15",
+                    "room": "cb1 706"
+                },
+                {
+                    "id": 1778688358051,
+                    "subject": "Data Science",
+                    "start": "09:30",
+                    "end": "10:45",
+                    "room": "cb1 705A"
+                }
+            ],
+            "Friday": [],
+            "Saturday": [],
+            "Sunday": []
+        }
+    }
 }

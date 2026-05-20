@@ -76,6 +76,22 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Task Type</label>
+                    <select id="category" class="w-full p-3 rounded-lg text-sm">
+                        <option value="Assignment">Assignment</option>
+                        <option value="Project">Project</option>
+                        <option value="Study">Study</option>
+                        <option value="Exam">Exam</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Description</label>
+                    <textarea id="description" rows="3" class="w-full p-3 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:border-brand-accent focus:outline-none transition-colors" placeholder="Task details..."></textarea>
+                </div>
+
+                <div>
                     <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Priority</label>
                     <select id="priority" class="w-full p-3 rounded-lg text-sm">
                         <option value="Normal">Normal</option>
@@ -101,6 +117,8 @@
             
             const title = document.getElementById('title').value;
             const datetime = document.getElementById('datetime').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
             const priority = document.getElementById('priority').value;
             
             // Format to ISO
@@ -113,8 +131,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: title,
+                        description: description,
                         deadline: isoString,
-                        category: 'Study',
+                        category: category,
                         status: 'Active',
                         priority: priority
                     })
