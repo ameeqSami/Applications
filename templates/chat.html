@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYS.AI Chat | Academic Task Manager</title>
+    <title>Assistant Chat | Academic Task Manager</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,14 +14,22 @@
                 extend: {
                     colors: {
                         brand: {
-                            bg: '#0A0A0B',
-                            surface: 'rgba(255, 255, 255, 0.03)',
-                            accent: '#8B5CF6',
-                            acid: '#A8FF35',
+                            bg: '#f8fafc',
+                            surface: '#ffffff',
+                            accent: '#2563eb',
+                            acid: '#0284c7',
                         }
                     },
                     fontFamily: {
-                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+                    },
+                    fontFamily: {
+                        mono: ['"Inter"', 'monospace'],
                     }
                 }
             }
@@ -29,20 +37,37 @@
     </script>
     <style>
         body {
-            background-color: #0A0A0B;
-            color: #ffffff;
-            font-family: 'JetBrains Mono', monospace;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
         }
 
         .glass-widget {
-            background-color: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 1rem;
             padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
+        .urgent-glow {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        /* Progress Ring */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke: #2563eb;
+        }
+        
+        .progress-ring__background {
+            stroke: #e2e8f0;
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -50,30 +75,17 @@
             background: transparent; 
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2); 
+            background: #cbd5e1; 
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3); 
+            background: #94a3b8; 
         }
         
-        input:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
-        }
-        
-        .msg-user {
-            background-color: rgba(139, 92, 246, 0.15);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            align-self: flex-end;
-            border-bottom-right-radius: 0;
-        }
-        
-        .msg-ai {
-            background-color: rgba(168, 255, 53, 0.05);
-            border: 1px solid rgba(168, 255, 53, 0.2);
-            align-self: flex-start;
-            border-bottom-left-radius: 0;
-            color: #A8FF35;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 1px #2563eb;
         }
     </style>
 </head>
@@ -81,24 +93,24 @@
 
     <header class="flex justify-between items-center px-2 relative z-50">
         <div class="flex items-center gap-4">
-            <button id="menu-btn" class="focus:outline-none hover:text-brand-acid transition-colors">
+            <button id="menu-btn" class="focus:outline-none hover:text-brand-accent transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
-            <h1 class="text-xl font-bold tracking-widest text-brand-acid hidden sm:block">SYS.AI_CORE</h1>
+            <h1 class="text-xl font-bold tracking-widest text-brand-accent hidden sm:block">SYS.AI_CORE</h1>
         </div>
         <div class="flex items-center gap-4">
-            <div class="text-xs uppercase tracking-widest text-brand-accent px-2 py-1 border border-white/10 rounded bg-white/5">USER: {{ username }}</div>
+            <div class="text-xs uppercase tracking-widest text-brand-accent px-2 py-1 border border-slate-200 rounded bg-slate-50">USER: {{ username }}</div>
             <div class="text-sm opacity-50 hidden md:block" id="current-time"></div>
         </div>
 
-        <div id="menu-dropdown" class="absolute top-10 left-2 w-48 bg-[#0A0A0B] border border-white/10 rounded-lg shadow-2xl hidden flex-col z-50 overflow-hidden" style="backdrop-filter: blur(15px); background-color: rgba(10, 10, 11, 0.9);">
-            <a href="/" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Dashboard</a>
-            <a href="/timetable" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Timetable</a>
-            <a href="/chat" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">SYS.AI Chat</a>
-            <a href="/reminder" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">Set Reminder</a>
-            <a href="/cgpa" class="px-4 py-3 text-sm hover:bg-white/5 hover:text-brand-acid transition-colors border-b border-white/5">CGPA Calculator</a>
+        <div id="menu-dropdown" class="absolute top-10 left-2 w-48 bg-white border border-slate-200 rounded-lg shadow-2xl hidden flex-col z-50 overflow-hidden" style="backdrop-filter: blur(15px); background-color: rgba(10, 10, 11, 0.9);">
+            <a href="/" class="px-4 py-3 text-sm hover:bg-slate-50 hover:text-brand-accent transition-colors border-b border-white/5">Dashboard</a>
+            <a href="/timetable" class="px-4 py-3 text-sm hover:bg-slate-50 hover:text-brand-accent transition-colors border-b border-white/5">Timetable</a>
+            <a href="/chat" class="px-4 py-3 text-sm hover:bg-slate-50 hover:text-brand-accent transition-colors border-b border-white/5">Assistant Chat</a>
+            <a href="/reminder" class="px-4 py-3 text-sm hover:bg-slate-50 hover:text-brand-accent transition-colors border-b border-white/5">Set Reminder</a>
+            <a href="/cgpa" class="px-4 py-3 text-sm hover:bg-slate-50 hover:text-brand-accent transition-colors border-b border-white/5">CGPA Calculator</a>
             <a href="/logout" class="px-4 py-3 text-sm hover:bg-red-500/20 text-red-400 transition-colors">Logout</a>
         </div>
     </header>
@@ -115,10 +127,10 @@
         </div>
 
         <!-- Input Terminal -->
-        <form id="chat-form" class="border-t border-white/10 p-4 bg-black/40 flex items-center gap-3">
-            <span class="text-brand-acid ml-2 opacity-70">❯</span>
-            <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-sm placeholder-white/30 text-white focus:ring-0 px-2 py-2" placeholder="Query the system..." autocomplete="off" required>
-            <button type="submit" class="px-4 py-2 bg-white/5 border border-white/10 hover:border-brand-acid hover:text-brand-acid transition-all rounded text-xs tracking-widest uppercase focus:outline-none">
+        <form id="chat-form" class="border-t border-slate-200 p-4 bg-black/40 flex items-center gap-3">
+            <span class="text-brand-accent ml-2 opacity-70">❯</span>
+            <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-sm placeholder-slate-400 text-slate-800 focus:ring-0 px-2 py-2" placeholder="Query the system..." autocomplete="off" required>
+            <button type="submit" class="px-4 py-2 bg-slate-50 border border-slate-200 hover:border-brand-accent hover:text-brand-accent transition-all rounded text-xs tracking-widest uppercase focus:outline-none">
                 Transmit
             </button>
         </form>

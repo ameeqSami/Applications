@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Set Reminder | Academic Task Manager</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,14 +14,22 @@
                 extend: {
                     colors: {
                         brand: {
-                            bg: '#0A0A0B',
-                            surface: 'rgba(255, 255, 255, 0.03)',
-                            accent: '#8B5CF6',
-                            acid: '#A8FF35',
+                            bg: '#f8fafc',
+                            surface: '#ffffff',
+                            accent: '#2563eb',
+                            acid: '#0284c7',
                         }
                     },
                     fontFamily: {
-                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+                    },
+                    fontFamily: {
+                        mono: ['"Inter"', 'monospace'],
                     }
                 }
             }
@@ -29,37 +37,62 @@
     </script>
     <style>
         body {
-            background-color: #0A0A0B;
-            color: #ffffff;
-            font-family: 'JetBrains Mono', monospace;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
         }
 
         .glass-widget {
-            background-color: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
-        input, select {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: border-color 0.2s;
+        .urgent-glow {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        /* Progress Ring */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke: #2563eb;
         }
         
-        input:focus, select:focus {
+        .progress-ring__background {
+            stroke: #e2e8f0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #8B5CF6;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 1px #2563eb;
         }
     </style>
 </head>
 <body class="min-h-screen w-full flex flex-col items-center justify-center p-4">
 
     <div class="w-full max-w-md">
-        <a href="/" class="text-brand-acid text-sm mb-6 inline-block hover:opacity-80 transition-opacity">← Back to Dashboard</a>
+        <a href="/" class="text-brand-accent text-sm mb-6 inline-block hover:opacity-80 transition-opacity">← Back to Dashboard</a>
         
         <div class="glass-widget">
             <h1 class="text-2xl font-bold tracking-widest text-brand-accent mb-6">SET REMINDER</h1>
@@ -88,7 +121,7 @@
 
                 <div>
                     <label class="block text-xs uppercase opacity-70 mb-2 tracking-widest">Description</label>
-                    <textarea id="description" rows="3" class="w-full p-3 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:border-brand-accent focus:outline-none transition-colors" placeholder="Task details..."></textarea>
+                    <textarea id="description" rows="3" class="w-full p-3 rounded-lg text-sm bg-slate-50 border border-slate-200 text-slate-800 focus:border-brand-accent focus:outline-none transition-colors" placeholder="Task details..."></textarea>
                 </div>
 
                 <div>
@@ -100,12 +133,12 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="mt-4 w-full p-3 bg-brand-accent text-white font-bold rounded-lg hover:bg-opacity-80 transition-colors uppercase tracking-widest text-sm">
+                <button type="submit" class="mt-4 w-full p-3 bg-brand-accent text-slate-800 font-bold rounded-lg hover:bg-opacity-80 transition-colors uppercase tracking-widest text-sm">
                     Create Reminder
                 </button>
             </form>
             
-            <div id="success-msg" class="hidden mt-4 text-brand-acid text-sm text-center">
+            <div id="success-msg" class="hidden mt-4 text-brand-accent text-sm text-center">
                 Reminder successfully scheduled.
             </div>
         </div>

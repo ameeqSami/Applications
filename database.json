@@ -68,7 +68,7 @@
             "title": "Database lab quiz ",
             "deadline": "2026-05-18T09:00:00.000Z",
             "category": "Study",
-            "status": "Active",
+            "status": "Overdue",
             "priority": "Normal",
             "urgency_flag": true
         },
